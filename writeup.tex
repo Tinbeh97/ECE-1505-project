@@ -1,5 +1,7 @@
 \documentclass[9pt,technote]{IEEEtran}
 
+\usepackage[backend=bibtex]{biblatex}
+\bibliography{database.bib}
 %% \usepackage[fleqn]{amsmath}
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amsfonts,amsthm,bm}
@@ -51,6 +53,8 @@
 \title{Latent Variable Selection with Convex Optimization}
 \author{Tina Behrouzi, Yuan Liu}
 
+\markboth{ECE1505 Convex Optimization Project}{}
+
 \maketitle
 
 \section*{Abstract}
@@ -98,11 +102,24 @@ For $K$ positive definite, the above problem can be cast as a convex optimzation
 \end{align*}
 
 \vfill\null
-% % \columnbreak
+
+\pagebreak
+
+Once the structure is receovered, a model can be trained using one of existing techniques such as loopy belief propagation, mean field, evidence lower bound, etc.\\
+
+Citation test only \cite{Chandra_1}.
+
+\vfill\null
+
 \pagebreak
 
 \section*{Conclusion}
 todo
-% \vfill\null
+\vfill\null
+
+\pagebreak
+
+\section*{References}
+\printbibliography[heading=none]
 
 \end {document}

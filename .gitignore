@@ -1,3 +1,7 @@
 *~
 *.aux
 *.log
+writeup-blx.bib
+writeup.bbl
+writeup.blg
+writeup.run.xml
