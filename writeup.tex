@@ -1,0 +1,108 @@
+\documentclass[9pt,technote]{IEEEtran}
+
+%% \usepackage[fleqn]{amsmath}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsfonts,amsthm,bm}
+\usepackage{breqn}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usepackage{algorithm2e}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{subcaption}
+%% \usepackage{datetime}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{mathrsfs}
+\usepackage{fancyhdr}
+\usepackage{fancyvrb}
+\usepackage{parskip} %turns off paragraph indent
+\pagestyle{fancy}
+
+\usetikzlibrary{arrows}
+
+\DeclareMathOperator*{\argmin}{argmin}
+\newcommand*{\argminl}{\argmin\limits}
+
+\DeclareMathOperator*{\argmax}{argmax}
+\newcommand*{\argmaxl}{\argmax\limits}
+
+\newcommand{\mathleft}{\@fleqntrue\@mathmargin0pt}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}} 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\norm}[1]{\|#1\|}
+\newcommand{\ppartial}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\set}[1]{\{#1\}}
+
+\setcounter{MaxMatrixCols}{20}
+
+% remove excess vertical space for align* equations
+\setlength{\abovedisplayskip}{0pt}
+\setlength{\belowdisplayskip}{0pt}
+\setlength{\abovedisplayshortskip}{0pt}
+\setlength{\belowdisplayshortskip}{0pt}
+
+\usepackage{multicol}
+
+\begin{document}
+
+\title{Latent Variable Selection with Convex Optimization}
+\author{Tina Behrouzi, Yuan Liu}
+
+\maketitle
+
+\section*{Abstract}
+todo\\
+\vfill\null
+% \columnbreak
+
+\section*{Main Body Sections (TBD)}
+todo..\\
+\vfill\null
+
+Derivations:\\
+Likelihood, assuming normal distribution:
+\begin{align*}
+  &L(\theta;x) = p_{\theta}(X=x | \theta)\\
+  &L(\theta;x) = \frac{1}{(2\pi)^{\frac{D}{2}} (det \Sigma)^{\frac{1}{2}}} exp(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu))
+\end{align*}
+Log likelihood:
+\begin{align*}
+  & l(\theta;x) = log L(\theta;x)\\
+  & -log((\frac{1}{2 \pi})^{\frac{D}{2}}) - log(det \Sigma)^{\frac{1}{2}} - \frac{1}{2}(x-\mu)^T \Sigma^{-1}(x-\mu) \bigg|_{\mu=\theta_{\mu}, \Sigma=\theta_{\Sigma}}
+\end{align*}
+Optimize over $\theta$:
+\begin{align*}
+  & \max_{\theta}\ log L(\theta;x)\\
+  & \max_{\theta}\ - \frac{1}{2} log(det \Sigma) - \frac{1}{2}(x-\mu)^T \Sigma^{-1}(x-\mu)
+\end{align*}
+Optimal solution:
+\begin{align*}
+  & \argmax_{\theta}\ -log(det \Sigma) - (x-\mu)^T \Sigma^{-1}(x-\mu)\\
+  &let\ z= x-\mu\\
+  &let\ \Sigma_{s}= zz^T\\
+  &let\ K = \Sigma^{-1}\\
+  &(x-\mu)^T \Sigma^{-1}(x-\mu) = tr(z^T \Sigma z) = tr(zz^T \Sigma^{-1}) = tr(\Sigma_{s} K)\\
+  & \argmax_{\theta}\ log(det K) - tr(\Sigma_{s} K)\\
+\end{align*}
+For $K$ positive definite, the above problem can be cast as a convex optimzation.
+\begin{align*}
+  &let\ K=S-L\\
+  &let\ S = X_O\ given\ X_H\\
+  &let\ L\ be\ marginalization\ over\ X_H\\
+  \\
+  &\max_{S,L}\ l(\theta=S-L; \Sigma_{s}) = \max_{S,L} log det(S-L) - tr(\Sigma_{s}(S-L))\\
+  &s.t.\ S-L \succ 0, L \succeq 0\\
+\end{align*}
+
+\vfill\null
+% % \columnbreak
+\pagebreak
+
+\section*{Conclusion}
+todo
+% \vfill\null
+
+\end {document}
