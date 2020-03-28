@@ -112,21 +112,34 @@ For $K$ positive definite, the above problem can be cast as a convex optimzation
   &let\ K=S-L\\
   &let\ S = X_O\ given\ X_H\\
   &let\ L\ be\ marginalization\ over\ X_H\\
-  \\
-  &\max_{S,L}\ l(\theta=S-L; \Sigma_{s}) = \max_{S,L} log det(S-L) - tr(\Sigma_{s}(S-L))\\
+  &\max_{S,L}\ l(\theta=S-L; \Sigma_{s}) = -\min_{S,L}\ -l(\theta=S-L; \Sigma_{s})\\
+\end{align*}
+Optimization Formulation:
+\begin{align*}
+  &\argmin_{S,L} -log det(S-L) + tr(\Sigma_{s}(S-L))\\
   &s.t.\ S-L \succ 0, L \succeq 0\\
 \end{align*}
-Adding a regularization term (from main paper):\\
+Adding a regularization term (from main paper):
 \begin{align*}
-  \max_{S,L}\ & l(\theta=S-L; \Sigma_{s}) + \lambda(\gamma \|S\|_1 + tr(L))\\
-  \max_{S,L}\ & log det(S-L) - tr(\Sigma_{s}(S-L))\\
-              & + \lambda(\gamma \|S\|_1 + tr(L))\\
-              s.t.\ & S-L \succ 0, L \succeq 0
+  \argmin_{S,L}\ & -l(\theta=S-L; \Sigma_{s}) + \lambda(\gamma \|S\|_1 + tr(L))\\
+  \argmin_{S,L}\ & -log det(S-L) + tr(\Sigma_{s}(S-L))\\
+                 & + \lambda(\gamma \|S\|_1 + tr(L))\\
+  s.t.\ & S-L \succ 0, L \succeq 0
 \end{align*}
+
 \vfill\null
 
 \pagebreak
 
+Assumptions:\\
+
+Concentration matrix decomposition into a sparse and low rank term.\\
+Sparse matrix corresponding to relationships between observable variables. This is expected not to be dense connected subgraphs which may otherwise be mistaken for latent variable marginalization.\\
+
+Low rank matrix corresponding to effect of marginalization over latent variables. This is expected not to be nearly aligned with the coordinate axis in order for increased chance of identifiability.\\
+
+\section*{Learning}
+todo..\\
 Once the structure is receovered, a model can be trained using one of existing techniques such as loopy belief propagation, mean field, evidence lower bound, etc.\\
 
 Citation test only \cite{Chandra_1}.
