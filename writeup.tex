@@ -60,29 +60,44 @@
 \section*{Abstract}
 todo\\
 include motivation, challenge, contributions\\
+
+In this project, we aim to explore how to choose good topology for graphical models using convex optimization techniques. Performance of graphical models used in methods such as Bayesian inference is dependent largely on the structure of the model and parameters such as latent variables, thus it is important to pick a good model topology. However, typical realization of graphical models uses some fixed prior or greedy search which are suboptimal and/or non-convergent in general. In several literature (cite sources), a different approach uses sparsity of graphical models and regularization terms in order to generate graph decomposition using convex invariants of graphs. Such general approach of sparsity and dimensionality reduction for selection of graphical model topology is our topic of interest.
+
 \vfill\null
 % \columnbreak
+\pagebreak
 
-\section*{Main Body Sections (TBD)}
+\section*{Preliminary Survey}
+Graph modeling is used in communication models, stock market, bio information, etc. Finding the structure of latent variables subject to observed ones has been the interest of many studies. The challenge faced when solving this optimization problem on recent data, which usually has high dimensionality and size. Previously, the Expectation-Maximization (EM) algorithm was widely used to learn latent variables of tree-like graphs (cite). However, it has a very slow convergence and poor local optima.
+
+In (cite), it is considered that latent and observed variables are jointly Gaussian, and the estimation of the covariance matrix between nodes is considered as the representation of the model. The assumption of the sparsity of the matrices has an important role in this method. L1 and nuclear norm regularizers are considered to find the best covariance matrix representation of the latent variable. Some papers have used the Alternating Direction Method of Multipliers (ADMM) to alter the method to the more class scaleable problem (cite).
+
+\section*{Other Main Sections (TBD)}
 todo..\\
+
 \vfill\null
+
+\pagebreak
 
 Derivations:\\
 Likelihood, assuming normal distribution:
 \begin{align*}
   &L(\theta;x) = p_{\theta}(X=x | \theta)\\
-  &L(\theta;x) = \frac{1}{(2\pi)^{\frac{D}{2}} (det \Sigma)^{\frac{1}{2}}} exp(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu))
+  &L(\theta;x) = \frac{1}{(2\pi)^{\frac{D}{2}} (det \Sigma)^{\frac{1}{2}}} exp(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu))\\
+  &\theta = (\mu,\Sigma)
 \end{align*}
 Log likelihood:
 \begin{align*}
-  & l(\theta;x) = log L(\theta;x)\\
-  & -log((\frac{1}{2 \pi})^{\frac{D}{2}}) - log(det \Sigma)^{\frac{1}{2}} - \frac{1}{2}(x-\mu)^T \Sigma^{-1}(x-\mu) \bigg|_{\mu=\theta_{\mu}, \Sigma=\theta_{\Sigma}}
+  l(\theta;x) & = log L(\theta;x)\\
+              & = -log((\frac{1}{2 \pi})^{\frac{D}{2}}) - log(det \Sigma)^{\frac{1}{2}}\\
+              & - \frac{1}{2}(x-\mu)^T \Sigma^{-1}(x-\mu)\\
 \end{align*}
 Optimize over $\theta$:
 \begin{align*}
   & \max_{\theta}\ log L(\theta;x)\\
   & \max_{\theta}\ - \frac{1}{2} log(det \Sigma) - \frac{1}{2}(x-\mu)^T \Sigma^{-1}(x-\mu)
 \end{align*}
+
 Optimal solution:
 \begin{align*}
   & \argmax_{\theta}\ -log(det \Sigma) - (x-\mu)^T \Sigma^{-1}(x-\mu)\\
@@ -101,7 +116,13 @@ For $K$ positive definite, the above problem can be cast as a convex optimzation
   &\max_{S,L}\ l(\theta=S-L; \Sigma_{s}) = \max_{S,L} log det(S-L) - tr(\Sigma_{s}(S-L))\\
   &s.t.\ S-L \succ 0, L \succeq 0\\
 \end{align*}
-
+Adding a regularization term (from main paper):\\
+\begin{align*}
+  \max_{S,L}\ & l(\theta=S-L; \Sigma_{s}) + \lambda(\gamma \|S\|_1 + tr(L))\\
+  \max_{S,L}\ & log det(S-L) - tr(\Sigma_{s}(S-L))\\
+              & + \lambda(\gamma \|S\|_1 + tr(L))\\
+              s.t.\ & S-L \succ 0, L \succeq 0
+\end{align*}
 \vfill\null
 
 \pagebreak
