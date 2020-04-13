@@ -27,7 +27,35 @@ tickers_sp100_2020_03_25_2m = {
     "tickers":
     ['AAPL','ABBV','ABT','ACN','ADBE','AGN','AIG','ALL','AMGN','AMT','AMZN','AXP','BA','BAC','BIIB','BK','BKNG','BLK','BMY','BRK-B','C','CAT','CHTR','CL','CMCSA','COF','COP','COST','CSCO','CVS','CVX','DD','DHR','DIS','DUK','EMR','EXC','F','FB','FDX','GD','GE','GILD','GM','GOOG','GOOGL','GS','HD','HON','IBM','INTC','JNJ','JPM','KMI','KO','LLY','LMT','LOW','MA','MCD','MDLZ','MDT','MET','MMM','MO','MRK','MS','MSFT','NEE','NFLX','NKE','NVDA','ORCL','OXY','PEP','PFE','PG','PM','PYPL','QCOM','RTX','SBUX','SLB','SO','SPG','T','TGT','TMO','TXN','UNH','UNP','UPS','USB','V','VZ','WBA','WFC','WMT','XOM']}
 
-l = [tickers_sp100_2014_2018_1d, tickers_sp100_2020_03_25_1m, tickers_sp100_2020_03_25_2m]
+tickers_small_2014_2018_1d = {
+    "name": "small_2014_2018_1d",
+    "date_window": ["2014-01-01", "2018-12-31"],
+    "interval": "1d",
+    "tickers":
+    ['GOOGL','AMZN','REGN','AMGN','TM','HMC','EA','ATVI']}
+
+tickers_small_2000_2018_1d = {
+    "name": "small_2000_2018_1d",
+    "date_window": ["2000-01-01", "2018-12-31"],
+    "interval": "1d",
+    "tickers":
+    ['GOOGL','AMZN','REGN','AMGN','TM','HMC','EA','ATVI']}
+
+#database query seems to return NaN for monthly, so use daily instead
+# tickers_small_2014_2018_1mo = {
+#     "name": "small_2014_2018_1mo",
+#     "date_window": ["2014-01-01", "2018-12-31"],
+#     "interval": "1mo",
+#     "tickers":
+#     ['GOOGL','AMZN','REGN','AMGN','GM','F','EA','ATVI']}
+
+l = [tickers_sp100_2014_2018_1d,
+     tickers_sp100_2020_03_25_1m,
+     tickers_sp100_2020_03_25_2m,
+     tickers_small_2014_2018_1d,
+     tickers_small_2000_2018_1d,
+     # tickers_small_2014_2018_1mo
+]
 
 for i in l:
     

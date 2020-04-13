@@ -1,5 +1,7 @@
 # fetches market data using given ticker json file
 # saves fetched data in fetched/ folder
+#
+# argument: <symbol file path>
 
 import yfinance as yf
 import pandas as pd
@@ -38,6 +40,9 @@ def get_data(ticker, time_start, time_end, interval):
                              interval=interval)
     df = pd.DataFrame(history)
     arr = df.to_numpy()
+    # print(arr[:,0])
+    # plt.plot(arr[:,0])
+    # plt.show()
     return arr
 
 def plot_data(tickers, arr, time_unit, val_type, is_log_scale=True):
@@ -64,7 +69,7 @@ def fetch(tickers, time_window, interval):
 
     #give a dummy stock which has long enough history for the time_window to query for data dimension size
     
-    dims_expected = get_data_dim('msft', *time_window, interval)  #get daily prices within time_window
+    dims_expected = get_data_dim('regn', *time_window, interval)  #get daily prices within time_window
 
     #filter out tickers that don't have expected dimension from query
     def filt_shape(item):
@@ -72,7 +77,9 @@ def fetch(tickers, time_window, interval):
         print("filtering: " + tickers[idx])
         if data.shape[0] < dims_expected[0]:
             print("discard: " + tickers[idx] + ", shape: " + str(data.shape), ", expected: " + str(dims_expected))
-        return data.shape == dims_expected
+            return False
+        else:
+            return True
 
     tickers_data = enumerate(map(lambda x: get_data(x, *time_window, interval), tickers))
 
@@ -81,9 +88,12 @@ def fetch(tickers, time_window, interval):
     (tickers_filt_idx, data) = list(zip(*tickers_data_filt))
 
     tickers_filt_name = list(map(lambda idx: tickers[idx], tickers_filt_idx))
-    
-    arr = np.stack(data)[0:dims_expected[0],...]
 
+    data_truncate = list(map(lambda x: x[0:dims_expected[0],...], data))
+    
+    # arr = np.stack(data_truncate)[0:dims_expected[0],...]
+    arr = np.stack(data_truncate)
+    
     return tickers_filt_idx, tickers_filt_name, arr
 
 if __name__ == "__main__":
@@ -91,7 +101,6 @@ if __name__ == "__main__":
     assert(len(sys.argv)>1)
     symbol_file_path = sys.argv[1]
     print("using symbol file: " + symbol_file_path)
-
 
     data = None
     
