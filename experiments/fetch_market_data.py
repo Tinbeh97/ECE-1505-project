@@ -56,6 +56,8 @@ def plot_prices(tickers_0, arr, time_unit, val_type, is_log_scale=True):
 
 def fetch(tickers, time_window):
 
+    #give a dummy stock which has long enough history for the time_window to query for data dimension size
+    
     dims_expected = get_data_dim('aapl', *time_window)  #get daily prices within time_window
 
     #filter out tickers that don't have expected dimension from query
