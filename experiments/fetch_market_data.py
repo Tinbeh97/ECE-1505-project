@@ -18,7 +18,7 @@ def  get_data_dim(ticker, time_start, time_end):
     tk = yf.Ticker(ticker)
     history = tk.history(# period=period,
                          start=time_start, end=time_end)
-    # print(history.__dict__) #see data format here
+    print("history dict: " + str(history.__dict__)) #see data format here
     df = pd.DataFrame(history)
     # print(df)
     arr = df.to_numpy()
@@ -34,18 +34,18 @@ def get_data(ticker, time_start, time_end):
     arr = df.to_numpy()
     return arr
 
-def plot_prices(tickers_0, arr, time_unit, val_type, is_log_scale=True):
+def plot_data(tickers, arr, time_unit, val_type, is_log_scale=True):
     
-    assert(len(tickers_0)==arr.shape[0])
+    assert(len(tickers)==arr.shape[0])
     
     ig = plt.figure(figsize=(10, 6))
     ax = plt.subplot(111)
     
-    for idx, _ in enumerate(tickers_0):
+    for idx, _ in enumerate(tickers):
         if is_log_scale:
-            ax.plot(np.log10(arr[idx,:,3]),label=tickers_0[idx])
+            ax.plot(np.log10(arr[idx,:]),label=tickers[idx])
         else:
-            ax.plot(arr[idx,:,3],label=tickers_0[idx])
+            ax.plot(arr[idx,:],label=tickers[idx])
 
     plt.ylabel(val_type + " (log10 scale)" if is_log_scale else val_type)
     plt.xlabel('time(' + time_unit +')')
@@ -116,4 +116,8 @@ if __name__ == "__main__":
     assert(all(map(lambda x: x[0] == x[1], zip(d,tk_name))))
 
     #test plot
-    plot_prices(tk_name, tk_arr, "day", "closing price", is_log_scale=True)
+    plot_data(tk_name, tk_arr[:,:,0], "day", "opening price", is_log_scale=True)
+    plot_data(tk_name, tk_arr[:,:,3], "day", "closing price", is_log_scale=True)
+    plot_data(tk_name, tk_arr[:,:,4], "day", "volume", is_log_scale=False)
+
+
