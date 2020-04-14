@@ -34,6 +34,7 @@ tickers_small_2014_2018_1d = {
     "tickers":
     ['GOOGL','AMZN','REGN','AMGN','TM','HMC','EA','ATVI']}
 
+#so far, using this one in experiment for monthly, weekly, biweekly
 tickers_small_2000_2018_1d = {
     "name": "small_2000_2018_1d",
     "date_window": ["2000-01-01", "2018-12-31"],
