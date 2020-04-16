@@ -1,11 +1,11 @@
-# analyze on fetched data, calculate weekly return,
+# analyze on fetched data, calculate interval returns,
 # uses convex solver and performs cross validation for parameters,
 # and saves resulting parameters in analysis/ folder
 #
 # note: use fetch_market_data.py to fetch data
 #
 # argument: <symbol file path> (use 1d interval data), <weekly/biweekly/monthly/daily> (interval)
-#   eg: python solve_market_observation.py symbols/small_2000_2018_1d.json
+#   eg: python solve_market_observation.py symbols/small_2000_2018_1d.json monthly
 
 import cvxpy as cp
 import numpy as np
@@ -16,51 +16,53 @@ import math
 
 from fetch_market_data import *
 
-# def is_semi_pos_def_chol(x):
-#     try:
-#         np.linalg.cholesky(x)
-#         return True
-#     except np.linalg.linalg.LinAlgError:
-#         return False
-
 def is_semi_pos_def_eigsh(x, epsilon=1e-10):
     return np.all(np.linalg.eigvalsh(x) >= -epsilon)
 
 def solve(lambda_n, gamma, observations):
 
-    obs_covariance = np.cov(observations)
-    p = obs_covariance.shape[0]
-    # S = cp.Variable((p,p), symmetric=True)
-    # L = cp.Variable((p,p), symmetric=True)
+    # observations.dot(observations.T)
+    obs = observations.dot(observations.T)
+    p = obs.shape[0]
+    S = cp.Variable((p,p))
+    # S = cp.Variable(p)
+    # S = cp.Variable((p,p), diag=True)
+    L = cp.Variable((p,p))
 
-    S = cp.Variable((p,p), symmetric=True)
-    L = cp.Variable((p,p), PSD=True)
+    # S = cp.Variable((p,p))
+    # L = cp.Variable((p,p))
 
-    # eps = 1e-10 #workaround for cvx not supporting strict inequalities
-    eps = 1.0
-    # eps = 0.0
-    constraints = [S-L >> cp.diag(0)]
-    constraints += [L >> cp.diag(0)]
+    eps = 1e-2 #workaround for cvx not supporting strict inequalities
+    # eps = 0
+    # constraints = [cp.diag(S)-L >> 0, L >> 0]
+    constraints = [L>>0, S-L >> 1]
 
-    # prob = cp.Problem(cp.Minimize(-cp.log_det(S-L) + cp.trace(cp.matmul(obs_covariance,(S-L))) +
-    #                               cp.multiply(lambda_n,(cp.multiply(gamma,cp.norm1(S)) + cp.trace(L)))),
-    #                   constraints)
-
-    prob = cp.Problem(cp.Minimize(-cp.log_det(S-L) + cp.trace((S-L) @ obs_covariance) +
-                                  cp.multiply(lambda_n,(cp.multiply(gamma,cp.norm1(S)) + cp.trace(L)))),
-                      constraints)
+    # prob = cp.Problem(cp.Minimize(-cp.log_det(S-L) + cp.trace(obs @ (S-L)) +
+    #                               lambda_n * cp.trace(L)), constraints)
+        
+    # prob = cp.Problem(cp.Minimize(-cp.log_det(S-L) + cp.trace(obs @ (S-L)) +
+    #                               lambda_n * cp.trace(L)), constraints)
     
+    prob = cp.Problem(cp.Minimize(-cp.log_det(S-L) + cp.trace(obs @ (S-L)) + lambda_n * (gamma * cp.norm1(S) + cp.trace(L))), constraints)
+    
+    # prob = cp.Problem(cp.Minimize(-cp.log_det(S-L) + cp.trace((S-L) @ obs) + cp.multiply(lambda_n,(cp.multiply(gamma,cp.norm1(S)) + cp.trace(L)))), constraints)
+
     prob.solve()
+    prob.solve(solver=cp.SCS, max_iters = 10000, use_indirect=False, eps=1e-9, verbose=True)
+    # print(cp.installed_solvers())
+    # prob.solve(solver=cp.CVXOPT)
     # print(prob.status)
     l = None
     s = None
     obj_val = None
+    print(prob.status)
     if prob.status not in ["infeasible", "unbounded"]:
         # Otherwise, problem.value is inf or -inf, respectively.
         # print("lambda: %f, gamma: %f: Optimal value: %s" % (lambda_n, gamma, prob.value))
         l = L.value
         s = S.value
         obj_val = prob.value
+        print("obj_val: ", obj_val)
     else:
         print("prob infeasible/unbounded")
 
@@ -156,8 +158,9 @@ if __name__ == "__main__":
     params = []
 
     # alter the below ranges for cross validation
-    lambdas = np.arange(0.01,1.5, 0.04)
-    gammas = np.arange(0.0001,0.2, 0.0004)
+    lambdas = np.arange(0.01, 1.0, 0.05)
+    gammas = np.arange(1.0, 1.2, 2.0)
+    # gammas = np.arange(0.001,0.002,0.5)
     
     num_lambda = lambdas.size
     num_gamma = gammas.size
@@ -177,13 +180,19 @@ if __name__ == "__main__":
         if l is not None and s is not None:
 
             #check that all eigenvalues are positive:
+            # assert(np.all(np.linalg.eigvals(np.diag(s)-l) > 0))
             assert(np.all(np.linalg.eigvals(s-l) > 0))
 
-            if not is_semi_pos_def_eigsh(l):
-                print("l not psd")
-                continue
+            print("l: ", l)
+            print("s: ", s)
+            print("s-l: ", np.diag(s)-l)
+            if not is_semi_pos_def_eigsh(s-l):
+                print("s-l not pd")                
+            # if not is_semi_pos_def_eigsh(l) or not is_semi_pos_def_eigsh(np.diag(s)-l):
+            #     print("l not psd")
+            #     continue
             
-            assert(is_semi_pos_def_eigsh(l))
+            # assert(is_semi_pos_def_eigsh(l))
                 
             obs_test_cov = np.cov(samples_test)
             cost = (-np.log(np.linalg.det(s-l))

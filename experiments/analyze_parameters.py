@@ -1,6 +1,6 @@
 # require: run solve_markert_observation.py before
-# argument: <observation results prefix>
-#   eg: python analyze_parameters.py symbols/small_2000_2018_1d.json
+# argument: <ticker file> <interval>
+#   eg: python analyze_parameters.py symbols/small_2000_2018_1d.json monthly
 
 import cvxpy as cp
 import numpy as np
@@ -100,9 +100,14 @@ if __name__ == "__main__":
     # idx_lambda = 4
     # idx_gamma = 0
 
+    idxlambda_len = xvalidation_map_train_filt.shape[0]
+    idxgamma_len = xvalidation_map_train_filt.shape[1]
+    
     # for idx_lambda, idx_gamma in itertools.product(range(0,30,1),range(0,30,)):
-    for idx_lambda, idx_gamma in itertools.product(range(35,-1,-1),range(0,30,)):        
+    for idx_lambda, idx_gamma in itertools.product(range(idxlambda_len-1,-1,-1),range(0,idxgamma_len,1)):        
         lambda_n = lambdas[idx_lambda]
+        # if idx_gamma > gammas.size-1:
+        #     continue
         gamma = gammas[idx_gamma]
 
         print('lambda_n, gamma: ', lambda_n, gamma)
@@ -121,6 +126,8 @@ if __name__ == "__main__":
             continue
         print("idx_lambda, idx_gamma: ", idx_lambda, idx_gamma)
         sl = s-l
+        if not is_semi_pos_def_eigsh(sl):
+            continue
         assert(is_semi_pos_def_eigsh(sl))
         
         print("s: ", s)
