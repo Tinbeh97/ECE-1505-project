@@ -16,19 +16,40 @@ import math
 
 from fetch_market_data import *
 
+# def is_semi_pos_def_chol(x):
+#     try:
+#         np.linalg.cholesky(x)
+#         return True
+#     except np.linalg.linalg.LinAlgError:
+#         return False
+
+def is_semi_pos_def_eigsh(x, epsilon=1e-10):
+    return np.all(np.linalg.eigvalsh(x) >= -epsilon)
+
 def solve(lambda_n, gamma, observations):
 
     obs_covariance = np.cov(observations)
     p = obs_covariance.shape[0]
+    # S = cp.Variable((p,p), symmetric=True)
+    # L = cp.Variable((p,p), symmetric=True)
+
     S = cp.Variable((p,p), symmetric=True)
-    L = cp.Variable((p,p), symmetric=True)
+    L = cp.Variable((p,p), PSD=True)
 
-    eps = 1e-10 #workaround for cvx not supporting strict inequalities
-    constraints = [S-L >> cp.diag(eps), L >> 0]
+    # eps = 1e-10 #workaround for cvx not supporting strict inequalities
+    eps = 1.0
+    # eps = 0.0
+    constraints = [S-L >> cp.diag(0)]
+    constraints += [L >> cp.diag(0)]
 
-    prob = cp.Problem(cp.Minimize(-cp.log_det(S-L) + cp.trace(cp.matmul(obs_covariance,(S-L))) +
+    # prob = cp.Problem(cp.Minimize(-cp.log_det(S-L) + cp.trace(cp.matmul(obs_covariance,(S-L))) +
+    #                               cp.multiply(lambda_n,(cp.multiply(gamma,cp.norm1(S)) + cp.trace(L)))),
+    #                   constraints)
+
+    prob = cp.Problem(cp.Minimize(-cp.log_det(S-L) + cp.trace((S-L) @ obs_covariance) +
                                   cp.multiply(lambda_n,(cp.multiply(gamma,cp.norm1(S)) + cp.trace(L)))),
                       constraints)
+    
     prob.solve()
     # print(prob.status)
     l = None
@@ -135,8 +156,8 @@ if __name__ == "__main__":
     params = []
 
     # alter the below ranges for cross validation
-    lambdas = np.arange(0.005,0.1, 0.0025)
-    gammas = np.arange(0.005,0.1, 0.0025)
+    lambdas = np.arange(0.01,1.5, 0.04)
+    gammas = np.arange(0.0001,0.2, 0.0004)
     
     num_lambda = lambdas.size
     num_gamma = gammas.size
@@ -154,6 +175,16 @@ if __name__ == "__main__":
         s,l,objval = solve(lambda_n, gamma, samples_train)
 
         if l is not None and s is not None:
+
+            #check that all eigenvalues are positive:
+            assert(np.all(np.linalg.eigvals(s-l) > 0))
+
+            if not is_semi_pos_def_eigsh(l):
+                print("l not psd")
+                continue
+            
+            assert(is_semi_pos_def_eigsh(l))
+                
             obs_test_cov = np.cov(samples_test)
             cost = (-np.log(np.linalg.det(s-l))
                     +np.trace(np.dot(obs_test_cov,(s-l)))

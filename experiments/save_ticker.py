@@ -50,11 +50,19 @@ tickers_small_2000_2018_1d = {
 #     "tickers":
 #     ['GOOGL','AMZN','REGN','AMGN','GM','F','EA','ATVI']}
 
+tickers_tiny_2014_2018_1d = {
+    "name": "tiny_2014_2018_1d",
+    "date_window": ["2014-01-01", "2018-01-01"],
+    "interval": "1d",
+    "tickers":
+    ['GOOGL','AMZN','REGN','AMGN']}
+
 l = [tickers_sp100_2014_2018_1d,
      tickers_sp100_2020_03_25_1m,
      tickers_sp100_2020_03_25_2m,
      tickers_small_2014_2018_1d,
      tickers_small_2000_2018_1d,
+     tickers_tiny_2014_2018_1d,
      # tickers_small_2014_2018_1mo
 ]
 
