@@ -22,7 +22,7 @@ def is_semi_pos_def_eigsh(x, epsilon=1e-10):
 def solve(lambda_n, gamma, observations):
 
     # observations.dot(observations.T)
-    obs = observations.dot(observations.T)
+    obs = 1.0/observations.shape[1] * observations.dot(observations.T)
     p = obs.shape[0]
     S = cp.Variable((p,p))
     # S = cp.Variable(p)
@@ -133,15 +133,30 @@ if __name__ == "__main__":
     indexing_weekly = np.arange(0,num_data_points,analysis_interval)
     
     closing = arr[:,indexing_weekly,3]    
-    opening = arr[:,indexing_weekly,0]
+    # opening = arr[:,indexing_weekly,0]
+    print("closing.shape: ", closing.shape)
+
+    #1st order difference
+    delta_price_frac = np.diff(closing, n=1, axis=1)
+
+    reference = closing[:,0:closing.shape[1]-1]
+    assert(reference.shape==delta_price_frac.shape)
+
+    #return in fraction
+    delta_price_frac = delta_price_frac / reference
     
-    delta_price_frac = (closing-opening)/opening
+    # delta_price_frac = (closing-opening)/opening
 
     #expect data to be in 1d interval
     index_day = interval.find("1d")
     assert(index_day != -1)
 
-    # plot_data(tk_names, delta_price_frac, x_label, "delta price fraction", is_log_scale=True)
+    # print("interval prices:")
+    # plot_data(tk_names, closing, x_label, "delta price fraction", is_log_scale=False)
+
+    # print("interval returns:")
+    # plot_data(tk_names, delta_price_frac, x_label, "delta price fraction", is_log_scale=False)
+    
     print("delta_price_frac.shape: ", delta_price_frac.shape)
 
     index = np.arange(0,delta_price_frac.shape[1])
@@ -153,62 +168,64 @@ if __name__ == "__main__":
 
     print(samples_train.shape)
     print(samples_test.shape)
-    from itertools import product
 
-    params = []
+    # pl.plot(delta_price_frac)
+    # from itertools import product
 
-    # alter the below ranges for cross validation
-    lambdas = np.arange(0.01, 1.0, 0.05)
-    gammas = np.arange(1.0, 1.2, 2.0)
-    # gammas = np.arange(0.001,0.002,0.5)
+    # params = []
+
+    # # alter the below ranges for cross validation
+    # lambdas = np.arange(0.01, 1.0, 0.05)
+    # gammas = np.arange(1.0, 1.2, 2.0)
+    # # gammas = np.arange(0.001,0.002,0.5)
     
-    num_lambda = lambdas.size
-    num_gamma = gammas.size
+    # num_lambda = lambdas.size
+    # num_gamma = gammas.size
     
-    xvalidation_grid_test = np.zeros((num_lambda, num_gamma))
-    xvalidation_grid_train = np.zeros((num_lambda, num_gamma))
+    # xvalidation_grid_test = np.zeros((num_lambda, num_gamma))
+    # xvalidation_grid_train = np.zeros((num_lambda, num_gamma))
     
-    for i in range(num_lambda):
-        for j in range(num_gamma):
-            params.append( ((i,lambdas[i]),
-                            (j,gammas[j])) )
+    # for i in range(num_lambda):
+    #     for j in range(num_gamma):
+    #         params.append( ((i,lambdas[i]),
+    #                         (j,gammas[j])) )
 
-    for ((i,lambda_n), (j,gamma)) in params:
+    # for ((i,lambda_n), (j,gamma)) in params:
 
-        s,l,objval = solve(lambda_n, gamma, samples_train)
+    #     s,l,objval = solve(lambda_n, gamma, samples_train)
 
-        if l is not None and s is not None:
+    #     if l is not None and s is not None:
 
-            #check that all eigenvalues are positive:
-            # assert(np.all(np.linalg.eigvals(np.diag(s)-l) > 0))
-            assert(np.all(np.linalg.eigvals(s-l) > 0))
+    #         #check that all eigenvalues are positive:
+    #         # assert(np.all(np.linalg.eigvals(np.diag(s)-l) > 0))
+    #         assert(np.all(np.linalg.eigvals(s-l) > 0))
 
-            print("l: ", l)
-            print("s: ", s)
-            print("s-l: ", np.diag(s)-l)
-            if not is_semi_pos_def_eigsh(s-l):
-                print("s-l not pd")                
-            # if not is_semi_pos_def_eigsh(l) or not is_semi_pos_def_eigsh(np.diag(s)-l):
-            #     print("l not psd")
-            #     continue
+    #         print("l: ", l)
+    #         print("s: ", s)
+    #         print("s-l: ", np.diag(s)-l)
+    #         if not is_semi_pos_def_eigsh(s-l):
+    #             print("s-l not pd")                
+    #         # if not is_semi_pos_def_eigsh(l) or not is_semi_pos_def_eigsh(np.diag(s)-l):
+    #         #     print("l not psd")
+    #         #     continue
             
-            # assert(is_semi_pos_def_eigsh(l))
+    #         # assert(is_semi_pos_def_eigsh(l))
                 
-            obs_test_cov = np.cov(samples_test)
-            cost = (-np.log(np.linalg.det(s-l))
-                    +np.trace(np.dot(obs_test_cov,(s-l)))
-                    +lambda_n * (gamma*np.linalg.norm(s,ord=1)) + np.trace(l))
-            xvalidation_grid_test[i,j] = cost
-            xvalidation_grid_train[i,j] = objval
-            print("lambda: " + str(lambda_n)+", gamma: " + str(gamma)+ ", cross validation test cost: " + str(cost) + ", training cost: " + str(objval))
+    #         obs_test_cov = np.cov(samples_test)
+    #         cost = (-np.log(np.linalg.det(s-l))
+    #                 +np.trace(np.dot(obs_test_cov,(s-l)))
+    #                 +lambda_n * (gamma*np.linalg.norm(s,ord=1)) + np.trace(l))
+    #         xvalidation_grid_test[i,j] = cost
+    #         xvalidation_grid_train[i,j] = objval
+    #         print("lambda: " + str(lambda_n)+", gamma: " + str(gamma)+ ", cross validation test cost: " + str(cost) + ", training cost: " + str(objval))
 
-    # ax = sns.heatmap(xvalidation_grid_test)
-    # pl.show()
+    # # ax = sns.heatmap(xvalidation_grid_test)
+    # # pl.show()
 
     #save
     np.save('analysis/' + data_name + '_'+save_suffix+'_samples_train.npy', samples_train)
     np.save('analysis/' + data_name + '_'+save_suffix+'_samples_test.npy', samples_test)
-    np.save('analysis/' + data_name + '_'+save_suffix+'_xvalidation_map_train.npy', xvalidation_grid_train)
-    np.save('analysis/' + data_name + '_'+save_suffix+'_xvalidation_map_test.npy', xvalidation_grid_test)
-    np.save('analysis/' + data_name + '_'+save_suffix+'_xvalidation_lambdas.npy', lambdas)
-    np.save('analysis/' + data_name + '_'+save_suffix+'_xvalidation_gammas.npy', gammas)
+    # np.save('analysis/' + data_name + '_'+save_suffix+'_xvalidation_map_train.npy', xvalidation_grid_train)
+    # np.save('analysis/' + data_name + '_'+save_suffix+'_xvalidation_map_test.npy', xvalidation_grid_test)
+    # np.save('analysis/' + data_name + '_'+save_suffix+'_xvalidation_lambdas.npy', lambdas)
+    # np.save('analysis/' + data_name + '_'+save_suffix+'_xvalidation_gammas.npy', gammas)
