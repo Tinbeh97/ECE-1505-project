@@ -13,6 +13,7 @@ import matplotlib.pylab as pl
 import scipy.sparse as sps
 import seaborn as sns
 import math
+import json
 
 from fetch_market_data import *
 
@@ -144,6 +145,10 @@ if __name__ == "__main__":
 
     #return in fraction
     delta_price_frac = delta_price_frac / reference
+
+    # # start = int(delta_price_frac.shape[1] * 5.0/10.0)
+    # for j in range(delta_price_frac.shape[0]):
+    #     print("nan exists: ", np.any(np.isnan(delta_price_frac[j,:])),  tk_names[j] )
     
     # delta_price_frac = (closing-opening)/opening
 
@@ -229,3 +234,13 @@ if __name__ == "__main__":
     # np.save('analysis/' + data_name + '_'+save_suffix+'_xvalidation_map_test.npy', xvalidation_grid_test)
     # np.save('analysis/' + data_name + '_'+save_suffix+'_xvalidation_lambdas.npy', lambdas)
     # np.save('analysis/' + data_name + '_'+save_suffix+'_xvalidation_gammas.npy', gammas)
+
+    # np.savetxt('analysis/' + data_name + '_'+save_suffix+'_samples_tickers.txt', tk_name, fmt="%s")
+    # np.save('analysis/' + data_name + '_'+save_suffix+'_samples_tickers.txt', samples_train)
+
+    ticker_filtered_json = {}
+    for i in range(tk_names.size):
+        ticker_filtered_json[str(i)] = tk_names[i]
+        
+    with open('analysis/' + data_name + '_'+save_suffix+'_tickers.txt', 'w', encoding='utf-8') as f:
+        json.dump(ticker_filtered_json, f, ensure_ascii=False, indent=4)

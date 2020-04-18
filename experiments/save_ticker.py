@@ -42,6 +42,14 @@ tickers_small_2000_2018_1d = {
     "tickers":
     ['GOOGL','AMZN','REGN','AMGN','TM','HMC','EA','ATVI']}
 
+#so far, using this one in experiment for monthly, weekly, biweekly
+tickers_small_2005_2018_1d = {
+    "name": "small_2005_2018_1d",
+    "date_window": ["2005-01-01", "2018-12-31"],
+    "interval": "1d",
+    "tickers":
+    ['GOOGL','AMZN','REGN','AMGN','TM','HMC','EA','ATVI']}
+
 #database query seems to return NaN for monthly, so use daily instead
 # tickers_small_2014_2018_1mo = {
 #     "name": "small_2014_2018_1mo",
@@ -63,6 +71,7 @@ l = [tickers_sp100_2014_2018_1d,
      tickers_small_2014_2018_1d,
      tickers_small_2000_2018_1d,
      tickers_tiny_2014_2018_1d,
+     tickers_small_2005_2018_1d,
      # tickers_small_2014_2018_1mo
 ]
 

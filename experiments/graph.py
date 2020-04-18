@@ -1,5 +1,5 @@
 import pprint
-import cvxpy as cp
+# import cvxpy as cp
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pylab as pl
@@ -13,7 +13,7 @@ import networkx as nx
         
 class Graph():
 
-    def __init__(self, matrix, thresh = 5e-5): #assumes concentration matrix
+    def __init__(self, matrix, thresh = 5e-5):
 
         self.neighbours = {}
         self.edges = {}
@@ -59,49 +59,55 @@ class Graph():
 
         G = nx.DiGraph()
 
-        thresh = 0.5e-5
-
         for i in range(self.matrix.shape[0]):
             for j in range(self.matrix.shape[1]):
-                v = self.matrix[i,j]
-                G.add_edge(i, j, weight=v, alpha=0.5)
-                
-        elarge = [(u, v) for (u, v, d) in G.edges(data=True) if d["weight"] > 0e-5]
-        esmall = [(u, v) for (u, v, d) in G.edges(data=True) if d["weight"] <= 0e-5]
+                if i != j: #don't consider self connections
+                    v = self.matrix[i,j]
+                    G.add_edge(i, j, weight=v)
 
-        pos = nx.spring_layout(G)  # positions for all nodes
+        thresh = 0.2e-8
+        
+        #filter edge on some strength threshold
+        # e_pos = [(u, v) for (u, v, d) in G.edges(data=True) if d["weight"] > thresh]
+        # e_neg = [(u, v) for (u, v, d) in G.edges(data=True) if d["weight"] <= -thresh]
+
+        e_pos = [(u, v) for (u, v, d) in G.edges(data=True) if d["weight"] >= 0]
+        e_neg = [(u, v) for (u, v, d) in G.edges(data=True) if d["weight"] < 0]
+
+        pos = nx.circular_layout(G)  # positions for all nodes
         
         # nodes
         nx.draw_networkx_nodes(G, pos, node_size=700)
 
-        edge_alpha_list = [ abs(self.matrix[e[0],e[1]]) for e in elarge ]
+        edge_alpha_list = [ abs(self.matrix[e[0],e[1]]) for e in e_pos]
 
-        alpha_max = np.amax(edge_alpha_list)
+        if len(edge_alpha_list) > 0:
+            alpha_max = np.amax(edge_alpha_list)
         
-        # edges
-        edges = nx.draw_networkx_edges(G, pos,
-                                       edgelist=elarge,
-                                       width=6,
-                                       edge_color='g',
-                                       arrowstyle='-')
+            # edges
+            edges = nx.draw_networkx_edges(G, pos,
+                                           edgelist=e_pos,
+                                           width=6,
+                                           edge_color='g', #colour positive weight as green
+                                           arrowstyle='-')
 
-        for i, arc in enumerate(edges):
-            arc.set_alpha(edge_alpha_list[i]/alpha_max)
+            for i, arc in enumerate(edges):
+                arc.set_alpha(edge_alpha_list[i]/alpha_max) #set alpha wrt. largest edge weight
 
-        edge_alpha_list2 = [ abs(self.matrix[e[0],e[1]]) for e in esmall ]
+        edge_alpha_list2 = [ abs(self.matrix[e[0],e[1]]) for e in e_neg]
 
         if len(edge_alpha_list2)>0:
             alpha_max = np.amax(edge_alpha_list2)
     
             edges = nx.draw_networkx_edges(G, pos,
-                                           edgelist=esmall,
+                                           edgelist=e_neg,
                                            width=6,
-                                           edge_color="r",
+                                           edge_color="r", #colour negative weight as red
                                            style="dashed",
                                            arrowstyle='-')
 
             for i, arc in enumerate(edges):
-                arc.set_alpha(edge_alpha_list2[i]/alpha_max)
+                arc.set_alpha(edge_alpha_list2[i]/alpha_max) #set alpha wrt. largest edge weight
         
         # labels
         nx.draw_networkx_labels(G, pos, font_size=20, font_family="sans-serif")
@@ -114,16 +120,5 @@ class Graph():
 
     def get_node_vals(self, idx):
         return self.node_vals[idx]
-        
-    def optimize(self):
-        
-        pass
-    
-        # todo: implement belief propagation
-        # eg: see section 2.3 of Gaussian Belief Propagation: Theory and Application by Danny Bickson
-       
-        # stop = False
-        
-        # while not stop:
             
             

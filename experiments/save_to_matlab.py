@@ -49,11 +49,15 @@ if __name__ == "__main__":
         print("unsupported interval")
         assert(False)
 
+    print('analysis/' + data_name + '_'+save_suffix+'_samples_train.npy')
+    print('analysis/' + data_name + '_'+save_suffix+'_samples_test.npy')
+    
     samples_train = np.load('analysis/' + data_name + '_'+save_suffix+'_samples_train.npy')
     samples_test = np.load('analysis/' + data_name + '_'+save_suffix+'_samples_test.npy')
     
     file_train =  'analysis/'+data_name+'_'+save_suffix+'_samples_train.npy'
     file_test =  'analysis/'+data_name+'_'+save_suffix+'_samples_test.npy'
+
     
     scipy.io.savemat('analysis/'+data_name+'_'+save_suffix+'_samples.mat', mdict={'train': samples_train, 'test': samples_test})
     

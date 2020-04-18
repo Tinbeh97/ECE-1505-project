@@ -1,0 +1,18 @@
+{
+    "name": "small_2000_2018_1d",
+    "date_window": [
+        "2000-01-01",
+        "2018-12-31"
+    ],
+    "interval": "1d",
+    "tickers": [
+        "GOOGL",
+        "AMZN",
+        "REGN",
+        "AMGN",
+        "TM",
+        "HMC",
+        "EA",
+        "ATVI"
+    ]
+}
