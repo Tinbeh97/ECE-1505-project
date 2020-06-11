@@ -1,1 +1,1 @@
-# ECE-1505-project
+# Latent Variable Selection with Convex Optimization
